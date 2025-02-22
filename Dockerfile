@@ -1,59 +1,55 @@
-ARG PHP_VERSION=8.2.4-fpm-bullseye
+ARG PHP_VERSION=8.2
 FROM php:${PHP_VERSION}
 
-## Diretório da aplicação
-ARG APP_DIR=/var/www/app
+# Diretório da aplicação
+WORKDIR /var/www/app
 
-## Versão da Lib do Redis para PHP
+# Variável para versão do Redis
 ARG REDIS_LIB_VERSION=5.3.7
 
-### apt-utils é um extensão de recursos do gerenciador de pacotes APT
+# Instalação de pacotes essenciais
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    apt-utils \ 
-    supervisor
-
-# dependências recomendadas de desenvolvido para ambiente linux
-RUN apt-get update && apt-get install -y \
+    apt-utils \
+    supervisor \
     zlib1g-dev \
     libzip-dev \
     unzip \
     libpng-dev \
     libpq-dev \
-    libxml2-dev
+    libxml2-dev \
+    nginx
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql pdo_pgsql pgsql session xml
+# Extensões PHP
+RUN docker-php-ext-install mysqli pdo pdo_mysql pdo_pgsql pgsql session xml zip iconv simplexml pcntl gd fileinfo
 
-# habilita instalação do Redis
-RUN pecl install redis-${REDIS_LIB_VERSION} \
-    && docker-php-ext-enable redis 
-
-RUN docker-php-ext-install zip iconv simplexml pcntl gd fileinfo
+# Instalação do Redis
+RUN pecl install redis-${REDIS_LIB_VERSION} && docker-php-ext-enable redis 
 
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Configurações adicionais
 COPY ./docker/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./docker/supervisord/supervisord.conf /etc/supervisord.d/
-### Supervisor permite monitorar e controlar vários processos (LINUX)
-### Bastante utilizado para manter processos em Daemon, ou seja, executando em segundo plano
-
 COPY ./docker/php/extra-php.ini "$PHP_INI_DIR/99_extra.ini"
 COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
 
-WORKDIR $APP_DIR
-RUN cd $APP_DIR
-RUN chown www-data:www-data $APP_DIR
+# Copia TODO o projeto para dentro do container
+COPY --chown=www-data:www-data . .
 
-COPY --chown=www-data:www-data ./app .
-RUN rm -rf vendor
-RUN composer install --no-interaction
+# Ajusta permissões
+RUN chown -R www-data:www-data /var/www/app
 
-RUN apt-get install nginx -y
+# Instala dependências do Laravel
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# Configuração do Nginx
 RUN rm -rf /etc/nginx/sites-enabled/* && rm -rf /etc/nginx/sites-available/*
 COPY ./docker/nginx/sites.conf /etc/nginx/sites-enabled/default.conf
 COPY ./docker/nginx/error.html /var/www/html/error.html
 
+# Limpeza de pacotes para reduzir o tamanho da imagem
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-# RUN apt update -y && apt install nano git -y
 
+# Comando para iniciar o supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
