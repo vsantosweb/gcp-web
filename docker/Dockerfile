@@ -32,17 +32,17 @@ RUN docker-php-ext-install zip iconv simplexml pcntl gd fileinfo
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY ./docker/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./docker/supervisord/supervisord.conf /etc/supervisord.d/
-### Supervisor permite monitorar e controlar vários processos (LINUX)
-### Bastante utilizado para manter processos em Daemon, ou seja, executando em segundo plano
-
-COPY ./docker/php/extra-php.ini "$PHP_INI_DIR/99_extra.ini"
-COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
-
 WORKDIR $APP_DIR
 RUN cd $APP_DIR
 RUN chown www-data:www-data $APP_DIR
+
+### Supervisor permite monitorar e controlar vários processos (LINUX)
+### Bastante utilizado para manter processos em Daemon, ou seja, executando em segundo plano
+COPY ./docker/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./docker/supervisord/supervisord.conf /etc/supervisord.d/
+
+COPY ./docker/php/extra-php.ini "$PHP_INI_DIR/99_extra.ini"
+COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
 
 COPY --chown=www-data:www-data ./app .
 RUN rm -rf vendor
