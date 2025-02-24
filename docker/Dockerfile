@@ -35,15 +35,15 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR $APP_DIR
 
 RUN cd $APP_DIR
-RUN ls -la /var/www/app
+RUN ls /var/www/app
 
 RUN chown www-data:www-data $APP_DIR
 
 
 ### Supervisor permite monitorar e controlar vários processos (LINUX)
 ### Bastante utilizado para manter processos em Daemon, ou seja, executando em segundo plano
-COPY ./app/docker/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ./app/docker/supervisord/supervisord.conf /etc/supervisord.d/
+COPY ./docker/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./docker/supervisord/supervisord.conf /etc/supervisord.d/
 
 COPY ./docker/php/extra-php.ini "$PHP_INI_DIR/99_extra.ini"
 COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
