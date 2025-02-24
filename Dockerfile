@@ -43,6 +43,7 @@ COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
 WORKDIR $APP_DIR
 RUN cd $APP_DIR
 RUN chown www-data:www-data $APP_DIR
+RUN chmod -R 755 $APP_DIR
 
 COPY --chown=www-data:www-data . .
 RUN rm -rf vendor
