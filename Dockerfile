@@ -45,9 +45,19 @@ RUN cd $APP_DIR
 RUN chown www-data:www-data $APP_DIR
 RUN chmod -R 755 $APP_DIR
 
+COPY .env.example .env
+
+### OCTANE
+#RUN composer require laravel/octane
+#RUN php artisan octane:install --server=swoole
+
 COPY --chown=www-data:www-data . .
 RUN rm -rf vendor
 RUN composer install --no-interaction
+
+##utils commands
+RUN php artisan key:generate
+RUN php artisan storage:link
 
 RUN apt-get install nginx -y
 RUN rm -rf /etc/nginx/sites-enabled/* && rm -rf /etc/nginx/sites-available/*
