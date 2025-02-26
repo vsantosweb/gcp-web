@@ -1,7 +1,17 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'compute',
+      'ssh',
+      'instance-20250226-025820',
+      '--zone=us-central1-a',
+      '--command=docker stop $(docker ps -q) && docker pull gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA && docker run -d gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA'
+    ]
 images:
-- 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA'
+  - 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA'
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
