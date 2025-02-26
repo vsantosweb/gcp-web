@@ -53,14 +53,15 @@ RUN rm -rf vendor
 
 RUN composer install --no-interaction
 
-## OCTANE
-RUN composer require laravel/octane
-RUN php artisan octane:install --server=swoole
-
 ##utils commands
 COPY .env.example .env
 RUN php artisan key:generate
 RUN php artisan storage:link
+
+## OCTANE
+RUN composer require laravel/octane
+RUN php artisan octane:install --server=swoole
+
 
 RUN apt-get install nginx -y
 RUN rm -rf /etc/nginx/sites-enabled/* && rm -rf /etc/nginx/sites-available/*
