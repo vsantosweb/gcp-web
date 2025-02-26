@@ -15,5 +15,3 @@ images:
   - 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA'
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
-  serviceAccount: '211594537698-compute@developer.gserviceaccount.com'
-
