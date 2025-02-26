@@ -43,6 +43,7 @@ COPY ./docker/supervisord/supervisord.conf /etc/supervisord.d/
 
 COPY ./docker/php/extra-php.ini "$PHP_INI_DIR/99_extra.ini"
 #COPY ./docker/php/extra-php-fpm.conf /etc/php8/php-fpm.d/www.conf
+COPY .env.example .env
 
 WORKDIR $APP_DIR
 RUN cd $APP_DIR
@@ -54,7 +55,7 @@ RUN rm -rf vendor
 RUN composer install --no-interaction
 
 ##utils commands
-COPY .env.example .env
+
 RUN php artisan key:generate
 RUN php artisan storage:link
 
