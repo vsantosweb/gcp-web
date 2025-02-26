@@ -1,0 +1,5 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA', '.']
+images:
+- 'gcr.io/babbo-420110/github.com/vsantosweb/gcp-web:$COMMIT_SHA'
